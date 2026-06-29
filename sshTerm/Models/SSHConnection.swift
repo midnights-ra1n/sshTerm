@@ -18,5 +18,6 @@ struct SSHConnection: Identifiable, Hashable, Codable {
     enum AuthMethod: Hashable, Codable {
         case password
         case privateKey(path: String)
+        case bitwardenItem(itemId: String)
     }
 }

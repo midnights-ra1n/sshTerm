@@ -13,27 +13,29 @@ enum SidebarItem: Identifiable, Hashable {
 
     var id: UUID {
         switch self {
-        case .connection(let connection): connection.id
-        case .folder(let folder): folder.id
+        case .connection(let connection): return connection.id
+        case .folder(let folder): return folder.id
         }
     }
 
     var name: String {
         switch self {
-        case .connection(let connection): connection.name
-        case .folder(let folder): folder.name
+        case .connection(let connection): return connection.name
+        case .folder(let folder): return folder.name
         }
     }
 
     var children: [SidebarItem]? {
         switch self {
-        case .connection: nil
-        case .folder(let folder): folder.children
+        case .connection: return nil
+        case .folder(let folder): return folder.children
         }
     }
 
     var isFolder: Bool {
-        if case .folder = self { return true }
-        return false
+        switch self {
+        case .folder: return true
+        case .connection: return false
+        }
     }
 }
