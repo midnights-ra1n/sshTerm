@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SidebarView: View {
     @State private var viewModel: SidebarViewModel
-    @FocusState private var renameFieldFocused: Bool
 
     init(store: ConnectionStore) {
         _viewModel = State(wrappedValue: SidebarViewModel(store: store))
@@ -31,7 +30,14 @@ struct SidebarView: View {
                 viewModel.addConnection(connection)
             }
         }
-
+        .alert("New Folder", isPresented: $viewModel.isAddingFolder) {
+            TextField("Folder name", text: $viewModel.newFolderName)
+            Button("Cancel", role: .cancel) {}
+            Button("Create") { viewModel.confirmAddFolder() }
+        } message: {
+            Text("Enter a name for the new folder.")
+        }
+        
         .dropDestination(for: DraggedSidebarItem.self) { dropped, _ in
             for item in dropped {
                 viewModel.move(itemID: item.id, into: nil)
@@ -64,14 +70,7 @@ struct SidebarView: View {
         HStack {
             Image(systemName: item.isFolder ? "folder" : "terminal")
                 .foregroundStyle(item.isFolder ? Color.secondary : Color.accentColor)
-
-            if viewModel.renamingItemID == item.id {
-                TextField("Name", text: $viewModel.renamingText)
-                    .focused($renameFieldFocused)
-                    .onSubmit { viewModel.commitRename() }
-            } else {
-                Text(item.name)
-            }
+            Text(item.name)
         }
     }
 
@@ -80,7 +79,6 @@ struct SidebarView: View {
             rowContent(for: item)
                 .contentShape(Rectangle())
                 .draggable(DraggedSidebarItem(id: item.id)) {
-                    // Preview simple, sans comportements attachés : évite la récursion.
                     rowContent(for: item).padding(6)
                 }
                 .applyIfFolder(item) { view, folder in
@@ -92,17 +90,8 @@ struct SidebarView: View {
                     }
                 }
                 .contextMenu {
-                    Button("Rename") {
-                        viewModel.beginRename(id: item.id, currentName: item.name)
-                        renameFieldFocused = true
-                    }
                     Button("Delete", role: .destructive) {
                         viewModel.delete(id: item.id)
-                    }
-                }
-                .onChange(of: viewModel.renamingItemID) { _, newValue in
-                    if newValue == item.id {
-                        renameFieldFocused = true
                     }
                 }
         )
@@ -118,7 +107,7 @@ struct SidebarView: View {
             .help("Add an SSH connection")
 
             Button {
-                viewModel.addFolder()
+                viewModel.beginAddFolder()
             } label: {
                 Label("Folder", systemImage: "folder.badge.plus")
             }
