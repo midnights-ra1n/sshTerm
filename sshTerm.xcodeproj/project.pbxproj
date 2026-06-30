@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		DC63AF0E2FF4324600C5F418 /* Citadel in Frameworks */ = {isa = PBXBuildFile; productRef = DC63AF0D2FF4324600C5F418 /* Citadel */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		DC8EB7C12FF28F9F007BBACE /* sshTerm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = sshTerm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC63AF0E2FF4324600C5F418 /* Citadel in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = sshTerm;
 			packageProductDependencies = (
+				DC63AF0D2FF4324600C5F418 /* Citadel */,
 			);
 			productName = sshTerm;
 			productReference = DC8EB7C12FF28F9F007BBACE /* sshTerm.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = DC8EB7B82FF28F9F007BBACE;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DC63AF0C2FF4324600C5F418 /* XCRemoteSwiftPackageReference "Citadel" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DC8EB7C22FF28F9F007BBACE /* Products */;
 			projectDirPath = "";
@@ -362,6 +371,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DC63AF0C2FF4324600C5F418 /* XCRemoteSwiftPackageReference "Citadel" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/orlandos-nl/Citadel";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.12.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DC63AF0D2FF4324600C5F418 /* Citadel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DC63AF0C2FF4324600C5F418 /* XCRemoteSwiftPackageReference "Citadel" */;
+			productName = Citadel;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DC8EB7B92FF28F9F007BBACE /* Project object */;
 }

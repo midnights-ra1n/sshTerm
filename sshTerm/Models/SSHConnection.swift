@@ -13,11 +13,10 @@ struct SSHConnection: Identifiable, Hashable, Codable {
     var host: String
     var port: Int = 22
     var username: String
-    var authMethod: AuthMethod = .password
+    var authMethod: AuthMethod = .password(nil)
 
     enum AuthMethod: Hashable, Codable {
-        case password
+        case password(String?)
         case privateKey(path: String)
-        case bitwardenItem(itemId: String)
     }
 }
