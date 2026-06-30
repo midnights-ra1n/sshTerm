@@ -17,6 +17,10 @@ final class SidebarViewModel {
     var isAddingFolder = false
     var newFolderName = ""
 
+    var isRenaming = false
+    var renamingItemID: UUID?
+    var renamingText = ""
+
     init(store: ConnectionStore) {
         self.store = store
     }
@@ -45,6 +49,20 @@ final class SidebarViewModel {
         isAddingFolder = false
     }
 
+    func beginRename(id: UUID, currentName: String) {
+        renamingItemID = id
+        renamingText = currentName
+        isRenaming = true
+    }
+
+    func confirmRename() {
+        guard let id = renamingItemID else { return }
+        let trimmed = renamingText.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        store.rename(id: id, to: trimmed)
+        isRenaming = false
+        renamingItemID = nil
+    }
     func delete(id: UUID) {
         store.delete(id: id)
     }

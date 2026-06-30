@@ -37,7 +37,13 @@ struct SidebarView: View {
         } message: {
             Text("Enter a name for the new folder.")
         }
-        
+        .alert("Rename", isPresented: $viewModel.isRenaming) {
+            TextField("Name", text: $viewModel.renamingText)
+            Button("Cancel", role: .cancel) {}
+            Button("Rename") { viewModel.confirmRename() }
+        } message: {
+            Text("Enter a new name.")
+        }
         .dropDestination(for: DraggedSidebarItem.self) { dropped, _ in
             for item in dropped {
                 viewModel.move(itemID: item.id, into: nil)
@@ -90,6 +96,9 @@ struct SidebarView: View {
                     }
                 }
                 .contextMenu {
+                    Button("Rename") {
+                        viewModel.beginRename(id: item.id, currentName: item.name)
+                    }
                     Button("Delete", role: .destructive) {
                         viewModel.delete(id: item.id)
                     }
