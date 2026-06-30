@@ -46,6 +46,10 @@ final class ConnectionStore {
         return nil
     }
 
+    func updateConnection(_ updated: SSHConnection) {
+        replace(id: updated.id, with: .connection(updated))
+    }
+    
     private func isDescendant(_ folder: SSHFolder, ofFolderWithID ancestorID: UUID) -> Bool {
         if folder.id == ancestorID { return true }
         guard case .folder(let containing)? = findItem(id: ancestorID) else { return false }

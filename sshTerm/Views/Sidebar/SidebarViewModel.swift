@@ -21,6 +21,10 @@ final class SidebarViewModel {
     var renamingItemID: UUID?
     var renamingText = ""
 
+    // State for editing a existing connection
+    var isEditingConnection = false
+    var editingConnection: SSHConnection?
+    
     init(store: ConnectionStore) {
         self.store = store
     }
@@ -34,8 +38,16 @@ final class SidebarViewModel {
         set { store.selection = newValue }
     }
 
+    private var selectedFolder: SSHFolder? {
+        guard let id = store.selection,
+              case .folder(let folder) = store.findItem(id: id) else {
+            return nil
+        }
+        return folder
+    }
+
     func addConnection(_ connection: SSHConnection) {
-        store.addConnection(connection)
+        store.addConnection(connection, into: selectedFolder)
     }
 
     func beginAddFolder() {
@@ -67,6 +79,17 @@ final class SidebarViewModel {
         store.delete(id: id)
     }
 
+    func beginEditConnection(_ connection: SSHConnection) {
+        editingConnection = connection
+        isEditingConnection = true
+    }
+
+    func confirmEditConnection(_ updated: SSHConnection) {
+        store.updateConnection(updated)
+        isEditingConnection = false
+        editingConnection = nil
+    }
+    
     func move(itemID: UUID, into destination: SSHFolder?) {
         store.move(itemID: itemID, into: destination)
     }

@@ -30,6 +30,13 @@ struct SidebarView: View {
                 viewModel.addConnection(connection)
             }
         }
+        .sheet(isPresented: $viewModel.isEditingConnection) {
+            if let connection = viewModel.editingConnection {
+                AddConnectionSheet(editing: connection) { updated in
+                    viewModel.confirmEditConnection(updated)
+                }
+            }
+        }
         .alert("New Folder", isPresented: $viewModel.isAddingFolder) {
             TextField("Folder name", text: $viewModel.newFolderName)
             Button("Cancel", role: .cancel) {}
@@ -96,6 +103,11 @@ struct SidebarView: View {
                     }
                 }
                 .contextMenu {
+                    if case .connection(let connection) = item {
+                        Button("Edit") {
+                            viewModel.beginEditConnection(connection)
+                        }
+                    }
                     Button("Rename") {
                         viewModel.beginRename(id: item.id, currentName: item.name)
                     }

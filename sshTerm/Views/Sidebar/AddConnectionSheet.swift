@@ -10,12 +10,33 @@ import SwiftUI
 struct AddConnectionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var name = ""
-    @State private var host = ""
-    @State private var port = "22"
-    @State private var username = ""
+    @State private var name: String
+    @State private var host: String
+    @State private var port: String
+    @State private var username: String
 
-    let onAdd: (SSHConnection) -> Void
+    private let editingID: UUID?
+    let onSave: (SSHConnection) -> Void
+
+    init(onSave: @escaping (SSHConnection) -> Void) {
+        self.editingID = nil
+        self.onSave = onSave
+        _name = State(initialValue: "")
+        _host = State(initialValue: "")
+        _port = State(initialValue: "22")
+        _username = State(initialValue: "")
+    }
+
+    init(editing connection: SSHConnection, onSave: @escaping (SSHConnection) -> Void) {
+        self.editingID = connection.id
+        self.onSave = onSave
+        _name = State(initialValue: connection.name)
+        _host = State(initialValue: connection.host)
+        _port = State(initialValue: String(connection.port))
+        _username = State(initialValue: connection.username)
+    }
+
+    private var isEditing: Bool { editingID != nil }
 
     var body: some View {
         Form {
@@ -31,20 +52,21 @@ struct AddConnectionSheet: View {
         }
         .padding()
         .frame(minWidth: 360, minHeight: 220)
-        .navigationTitle("New connection")
+        .navigationTitle(isEditing ? "Edit Connection" : "New Connection")
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Add") {
+                Button(isEditing ? "Save" : "Add") {
                     let connection = SSHConnection(
+                        id: editingID ?? UUID(),
                         name: name.trimmingCharacters(in: .whitespaces).isEmpty ? host : name,
                         host: host,
                         port: Int(port) ?? 22,
                         username: username
                     )
-                    onAdd(connection)
+                    onSave(connection)
                     dismiss()
                 }
                 .disabled(host.trimmingCharacters(in: .whitespaces).isEmpty
