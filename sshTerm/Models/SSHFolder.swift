@@ -9,7 +9,7 @@ import Foundation
 import Observation
 
 @Observable
-final class SSHFolder: Identifiable {
+final class SSHFolder: Identifiable, Codable {
     let id: UUID
     var name: String
     var children: [SidebarItem]
@@ -18,6 +18,25 @@ final class SSHFolder: Identifiable {
         self.id = id
         self.name = name
         self.children = children
+    }
+
+    // MARK Codable
+    enum CodingKeys: String, CodingKey {
+        case id, name, children
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        children = try container.decode([SidebarItem].self, forKey: .children)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(children, forKey: .children)
     }
 }
 

@@ -11,8 +11,18 @@ import Observation
 @Observable
 final class ConnectionStore {
     var rootItems: [SidebarItem] = []
-
     var selection: UUID?
+
+    private let storage: ConnectionStorage
+
+    init(storage: ConnectionStorage = ConnectionStorage()) {
+        self.storage = storage
+        self.rootItems = storage.load()
+    }
+
+    private func persist() {
+        storage.save(rootItems)
+    }
 
     func addConnection(_ connection: SSHConnection, into folder: SSHFolder? = nil) {
         let item = SidebarItem.connection(connection)
@@ -22,6 +32,7 @@ final class ConnectionStore {
             rootItems.append(item)
         }
         selection = connection.id
+        persist()
     }
 
     @discardableResult
@@ -32,6 +43,7 @@ final class ConnectionStore {
         } else {
             rootItems.append(.folder(folder))
         }
+        persist()
         return folder
     }
 
@@ -44,16 +56,6 @@ final class ConnectionStore {
             }
         }
         return nil
-    }
-
-    func updateConnection(_ updated: SSHConnection) {
-        replace(id: updated.id, with: .connection(updated))
-    }
-    
-    private func isDescendant(_ folder: SSHFolder, ofFolderWithID ancestorID: UUID) -> Bool {
-        if folder.id == ancestorID { return true }
-        guard case .folder(let containing)? = findItem(id: ancestorID) else { return false }
-        return containsFolder(containing, targetID: folder.id)
     }
 
     private func containsFolder(_ folder: SSHFolder, targetID: UUID) -> Bool {
@@ -82,6 +84,7 @@ final class ConnectionStore {
         } else {
             rootItems.append(item)
         }
+        persist()
     }
 
     @discardableResult
@@ -107,6 +110,7 @@ final class ConnectionStore {
     func delete(id: UUID) {
         _ = removeItem(id: id)
         if selection == id { selection = nil }
+        persist()
     }
 
     func rename(id: UUID, to newName: String) {
@@ -120,10 +124,12 @@ final class ConnectionStore {
             connection.name = trimmed
             replace(id: id, with: .connection(connection))
         case nil:
-            break
+            return
         }
+        persist()
     }
 
+    @discardableResult
     private func replace(id: UUID, with newItem: SidebarItem, in items: inout [SidebarItem]) -> Bool {
         if let index = items.firstIndex(where: { $0.id == id }) {
             items[index] = newItem
@@ -141,5 +147,9 @@ final class ConnectionStore {
 
     private func replace(id: UUID, with newItem: SidebarItem) {
         _ = replace(id: id, with: newItem, in: &rootItems)
+    }
+    func updateConnection(_ updated: SSHConnection) {
+        replace(id: updated.id, with: .connection(updated))
+        persist()
     }
 }
