@@ -31,6 +31,7 @@ struct SidebarView: View {
                 viewModel.addConnection(connection)
             }
         }
+
         .dropDestination(for: DraggedSidebarItem.self) { dropped, _ in
             for item in dropped {
                 viewModel.move(itemID: item.id, into: nil)
@@ -58,46 +59,52 @@ struct SidebarView: View {
         }
     }
 
+    @ViewBuilder
+    private func rowContent(for item: SidebarItem) -> some View {
+        HStack {
+            Image(systemName: item.isFolder ? "folder" : "terminal")
+                .foregroundStyle(item.isFolder ? Color.secondary : Color.accentColor)
+
+            if viewModel.renamingItemID == item.id {
+                TextField("Name", text: $viewModel.renamingText)
+                    .focused($renameFieldFocused)
+                    .onSubmit { viewModel.commitRename() }
+            } else {
+                Text(item.name)
+            }
+        }
+    }
+
     private func label(for item: SidebarItem) -> AnyView {
         AnyView(
-            HStack {
-                Image(systemName: item.isFolder ? "folder" : "terminal")
-                    .foregroundStyle(item.isFolder ? Color.secondary : Color.accentColor)
-
-                if viewModel.renamingItemID == item.id {
-                    TextField("Name", text: $viewModel.renamingText)
-                        .focused($renameFieldFocused)
-                        .onSubmit { viewModel.commitRename() }
-                } else {
-                    Text(item.name)
+            rowContent(for: item)
+                .contentShape(Rectangle())
+                .draggable(DraggedSidebarItem(id: item.id)) {
+                    // Preview simple, sans comportements attachés : évite la récursion.
+                    rowContent(for: item).padding(6)
                 }
-            }
-            .contentShape(Rectangle())
-            .draggable(DraggedSidebarItem(id: item.id)) {
-                label(for: item).padding(6)
-            }
-            .applyIfFolder(item) { view, folder in
-                view.dropDestination(for: DraggedSidebarItem.self) { dropped, _ in
-                    for dragged in dropped {
-                        viewModel.move(itemID: dragged.id, into: folder)
+                .applyIfFolder(item) { view, folder in
+                    view.dropDestination(for: DraggedSidebarItem.self) { dropped, _ in
+                        for dragged in dropped {
+                            viewModel.move(itemID: dragged.id, into: folder)
+                        }
+                        return true
                     }
-                    return true
                 }
-            }
-            .contextMenu {
-                Button("Rename") {
-                    viewModel.beginRename(id: item.id, currentName: item.name)
-                    renameFieldFocused = true
+                .contextMenu {
+                    Button("Rename") {
+                        viewModel.beginRename(id: item.id, currentName: item.name)
+                        renameFieldFocused = true
+                    }
+                    Button("Delete", role: .destructive) {
+                        viewModel.delete(id: item.id)
+                    }
                 }
-                Button("Delete", role: .destructive) {
-                    viewModel.delete(id: item.id)
+                .onChange(of: viewModel.renamingItemID) { _, newValue in
+                    if newValue == item.id {
+                        renameFieldFocused = true
+                    }
                 }
-            }
-            .onChange(of: viewModel.renamingItemID) { _, newValue in
-                if newValue == item.id {
-                    renameFieldFocused = true
-                }
-            }
         )
     }
 
